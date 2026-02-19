@@ -3,11 +3,11 @@ SRC_DIR = src
 BIN_DIR = bin
 OBJ_DIR = obj
 
-# Find all source files (*.c)
-SRC_FILES := $(wildcard $(SRC_DIR)/*.c)
+# Find all source files (*.c) recursively
+SRC_FILES := $(shell find $(SRC_DIR) -name '*.c')
 
 # Create object files from source files (*.o)
-OBJ_FILES := $(SRC_FILES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+OBJ_FILES := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_FILES))
 
 # Define the name of the final executable
 EXECUTABLE = $(BIN_DIR)/program
@@ -22,6 +22,7 @@ $(EXECUTABLE): $(OBJ_FILES) | $(BIN_DIR)
 
 # Rule to create object files from C source files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Rule to create the object directory if it doesn't exist
