@@ -2,8 +2,6 @@
 #include "core/logger.h"
 #include "core/common.h"
 
-#include <string.h>
-
 enum {
 	ProgramMaxAllocatedBytes = 4096,
 };
