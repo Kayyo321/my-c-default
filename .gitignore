@@ -53,3 +53,9 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# Ignore all bin/ directories
+**/bin/
+
+# Ignore all obj/ directories
+**/obj/
