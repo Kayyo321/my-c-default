@@ -300,6 +300,7 @@ void quit(result res) {
 
     res = scan_and_deallocate() == Ok ? res : Err;
 
+    fprintf(stderr, "%s warn count: %lu, error count: %lu\n", program.title, warn_cnt, error_cnt);
     fprintf(stderr, "%s exited with code %d\n", program.title, res);
     exit(res);
 }
@@ -347,9 +348,9 @@ static result log_message(const char *fmt, va_list args, int log_flags) {
 
     char footer[4];
     if (log_flags & LogFlagError) {
-        memcpy(footer, "(EE)", 5);
+        memmove(footer, "(EE)", 4);
     } else if (log_flags & LogFlagWarn) {
-        memcpy(footer, "(!!)", 5);
+        memmove(footer, "(!!)", 4);
     } else {
         footer[0] = '\0';
     }
@@ -363,15 +364,15 @@ static result log_message(const char *fmt, va_list args, int log_flags) {
     if (footer[0] != '\0') {
         char temp_buffer[sizeof(msg_buffer)];
         snprintf(temp_buffer, sizeof(temp_buffer), "%s [%s] %s", footer, time_buffer, msg_buffer);
-        memcpy(msg_buffer, temp_buffer, sizeof(msg_buffer));
+        memmove(msg_buffer, temp_buffer, sizeof(msg_buffer));
     } else {
         char temp_buffer[sizeof(msg_buffer)];
         snprintf(temp_buffer, sizeof(temp_buffer), "[%s] %s", time_buffer, msg_buffer);
-        memcpy(msg_buffer, temp_buffer, sizeof(msg_buffer));
+        memmove(msg_buffer, temp_buffer, sizeof(msg_buffer));
     }
 
-    fputs(msg_buffer, log_file);
-    fputs(msg_buffer, stderr);
+    fputs(msg_buffer, log_file); fputc('\n', log_file);
+    fputs(msg_buffer, stderr); fputc('\n', stderr);
 
     fflush(log_file);
     fflush(stderr);
