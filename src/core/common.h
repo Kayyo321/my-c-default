@@ -1,24 +1,65 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef CommonH
+#define CommonH
 
-#include <stdint.h>
-#include <stddef.h>
+#define Version "0.1.0"
 
 enum {
-	True = 1,
-	False = 0,
+    True = 1,
+    False = 0,
+
+    Ok = 0,
+    Err = 1,
 };
 
+typedef unsigned char boolean; 
+typedef unsigned char result;
+typedef unsigned long usize;
+
 typedef struct {
-	char **argv;
-	int argc;
-} program_arguments_t;
+    char *title;
 
-extern program_arguments_t program_arguments;
+    usize argc;
+    char **argv;
+} Program;
 
-typedef uint8_t boolean;
-typedef size_t usize;
+typedef struct {
+    void *pointer;
+    usize size;
+    void *priv;
+} Heap;
 
-void *null(void);
+extern void *const Null;
+extern Program program;
+extern const Heap NullHeap;
 
+void quit(result res);
+
+result open_logger(void);
+result close_logger(void);
+
+void log_msg(const char *fmt, ...);
+void log_warn(const char *fmt, ...);
+void log_err(const char *fmt, ...);
+
+usize get_error_count(void);
+usize get_warn_count(void);
+
+#ifdef Testing
+void restore_diagnostic_counts(usize warn_count, usize error_count);
+#endif // Testing
+
+Heap allocate(usize count, usize bytes);
+Heap reallocate(Heap heap, usize new_size);
+void deallocate(Heap heap);
+
+result scan_and_deallocate(void); // returns Err if any leaked bytes are reclaimed, otherwise Ok
+
+void set_default_raylib_log_level(void);
+
+#if !defined(CommonAllowStdlibAllocators)
+#define malloc(...) UseAllocateInsteadOfMalloc
+#define realloc(...) UseReallocateInsteadOfRealloc
+#define free(...) UseDeallocateInsteadOfFree
 #endif
+
+#endif // COMMON_H
