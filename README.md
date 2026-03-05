@@ -1,16 +1,73 @@
 # my-c-default
-My default project structure for all of my C projects
 
-## Arena allocator API
+Starter C project template with:
+- Recursive `Makefile` build.
+- Centralized diagnostics/logging utilities.
+- Simple heap allocation tracking with leak scanning on exit.
 
-`src/allocator.c` implements a virtual-disk backed arena system.
+## Project structure
 
-- Call `init_vdisk(bytes)` once to create the backing store.
-- Create partitions with `partition_vdisk(block_size)`, which returns an `allocator_t*`.
-- Allocate with `allocate(allocator, bytes)`.
-- Reallocate with `reallocate(allocator, old, old_size, new_size)`.
-	- Growth in place is supported only when `old` is the most recent allocation in that partition.
-	- Otherwise, a new block is allocated in the same partition and data is copied.
-- No per-allocation free is supported (arena behavior).
-- Call `unmount_partition(allocator)` to remove one partition and compact later partitions left in vdisk.
-- Call `free_vdisk()` to release all storage.
+```text
+.
+├── Makefile
+├── src/
+│   ├── main.c
+│   └── core/
+│       ├── common.c
+│       └── common.h
+├── obj/         # build artifacts
+├── bin/         # executable output
+└── logs/        # rotating log files
+```
+
+## Build
+
+```sh
+make
+```
+
+This compiles all `src/**/*.c` files into `obj/**/*.o` and links `bin/program`.
+
+## Run
+
+```sh
+./bin/program
+```
+
+Example output includes diagnostic counters and exit code, and logs are written to `logs/`.
+
+## Clean
+
+```sh
+make clean
+```
+
+Removes `obj/` and `bin/`.
+
+## Core utilities (`src/core/common.*`)
+
+`common.h` and `common.c` provide shared project utilities:
+
+- Program metadata via global `program` (`title`, `argc`, `argv`).
+- Logging API:
+	- `open_logger()` / `close_logger()`
+	- `log_msg(...)`, `log_warn(...)`, `log_err(...)`
+	- `get_warn_count()`, `get_error_count()`
+- Heap helpers:
+	- `allocate(count, bytes)`
+	- `reallocate(heap, new_size)`
+	- `deallocate(heap)`
+	- `scan_and_deallocate()`
+- Process shutdown helper:
+	- `quit(result)` prints diagnostics, scans for leaks, and exits.
+
+## Logging behavior
+
+- Current run writes to `logs/log0-last.log`.
+- Older logs are rotated to numbered files like `logs/log1-<timestamp>.log`.
+- Messages are mirrored to both log file and `stderr`.
+
+## Notes
+
+- The codebase intentionally discourages direct `malloc`/`realloc`/`free` in most translation units via macros in `common.h`.
+- `Version` is currently defined in `src/core/common.h` as `"0.1.0"`.
